@@ -17,7 +17,7 @@ texts = [
 labels = [0, 0, 0, 1, 1, 1, 2, 2, 2]
 
 # Tokenize the text data
-tokenizer = Tokenizer()
+tokenizer = Tokenizer(lower=False)
 tokenizer.fit_on_texts(texts)
 word_index = tokenizer.word_index
 
@@ -83,7 +83,7 @@ def detect_and_classify(input_str):
 # Example usage
 
 
-str_input = "mfi رقم تعديل Golden وزنة"
+str_input = "MFI رقم تعديل Golden وزنة"
 
 result = detect_and_classify(str_input)
 print(result)
