@@ -8,7 +8,7 @@ import numpy as np
 # Define regex patterns and status/reason texts
 texts = [
     "MFI", "AMFD", "HIF",  # Status
-    "Golden", "weight2", "post",  # Status
+    "تعديل", "weight2", "post",  # Status
     "asd", "وزنة", "sda"  # Reason
 ]
 
@@ -55,33 +55,35 @@ def detect_and_classify(input_str):
 
     # Split the input string into individual words
     words = input_str.split()
-
+    print(word_index)
     for word in words:
+       if word in word_index:
+            # Tokenize and pad the input word
+            input_sequence = tokenizer.texts_to_sequences([word])
+            input_padded = pad_sequences(input_sequence,  maxlen=max_length)
 
-        # Tokenize and pad the input word
-        input_sequence = tokenizer.texts_to_sequences([word])
-        input_padded = pad_sequences(input_sequence,  maxlen=max_length)
+            # Predict the classification
+            prediction = model.predict(input_padded)
+            class_label = np.argmax(prediction, axis=1)[0]
 
-        # Predict the classification
-        prediction = model.predict(input_padded)
-        class_label = np.argmax(prediction, axis=1)[0]
+            # Store the word in the respective variable based on the class
+            if class_label == 0 and custom_variables['numberofWeight'] is None:
+                custom_variables['numberofWeight'] = word
 
-        # Store the word in the respective variable based on the class
-        if class_label == 0 and custom_variables['numberofWeight'] is None:
-            custom_variables['numberofWeight'] = word
+            elif class_label == 1 and custom_variables['status'] is None:
+                custom_variables['status'] = word
 
-        elif class_label == 1 and custom_variables['status'] is None:
-            custom_variables['status'] = word
+            elif class_label == 2 and custom_variables['reason'] is None:
+                custom_variables['reason'] = word
 
-        elif class_label == 2 and custom_variables['reason'] is None:
-            custom_variables['reason'] = word
+       else: print(f"Word '{word}' is out of vocabulary and cannot be classified.")
 
     return custom_variables
 
 # Example usage
 
 
-str_input = "AMFD  رقم Golden وزنة"
+str_input = "mfi رقم تعديل Golden وزنة"
 
 result = detect_and_classify(str_input)
 print(result)
