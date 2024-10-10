@@ -7,7 +7,7 @@ import numpy as np
 
 # Define regex patterns and status/reason texts
 texts = [
-    "MFI", "AMFD", "HIF",  # Status
+    "MFI-05258254", "AMFD", "HIF",  # Number of weight
     "تعديل", "weight2", "post",  # Status
     "asd", "وزنة", "sda"  # Reason
 ]
@@ -17,7 +17,7 @@ texts = [
 labels = [0, 0, 0, 1, 1, 1, 2, 2, 2]
 
 # Tokenize the text data
-tokenizer = Tokenizer(lower=False)
+tokenizer = Tokenizer(oov_token="OOV",lower=False,filters='!"#$%&()*.,/:;<=>?@[]^_`{|}~')
 tokenizer.fit_on_texts(texts)
 word_index = tokenizer.word_index
 
@@ -29,7 +29,6 @@ print(max_length)
 
 padded_sequences = pad_sequences(sequences,  maxlen=max_length)
 print(padded_sequences)
-
 # Define a simple classification model
 model = Sequential([
     Embedding(input_dim=len(word_index) + 1, output_dim=8, input_length=max_length),
@@ -37,12 +36,11 @@ model = Sequential([
     Dense(3, activation='softmax')  # 3 classes: Number of Weight, Status, Reason
 ])
 model.summary()
-#"""
 # Compile the model
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 # Train the model
-model.fit(padded_sequences, np.array(labels), epochs=100, verbose=1)
+model.fit(padded_sequences, np.array(labels), epochs=200, verbose=1)
 
 # Test detection function
 def detect_and_classify(input_str):
@@ -57,7 +55,7 @@ def detect_and_classify(input_str):
     words = input_str.split()
     print(word_index)
     for word in words:
-       if word in word_index:
+      # if word in word_index:
             # Tokenize and pad the input word
             input_sequence = tokenizer.texts_to_sequences([word])
             input_padded = pad_sequences(input_sequence,  maxlen=max_length)
@@ -76,14 +74,14 @@ def detect_and_classify(input_str):
             elif class_label == 2 and custom_variables['reason'] is None:
                 custom_variables['reason'] = word
 
-       else: print(f"Word '{word}' is out of vocabulary and cannot be classified.")
+       #else: print(f"Word '{word}' is out of vocabulary and cannot be classified.")
 
     return custom_variables
 
 # Example usage
 
 
-str_input = "MFI رقم تعديل Golden وزنة"
+str_input = "HIF-05258254 رقم تعديل Golden وزنة"
 
 result = detect_and_classify(str_input)
 print(result)
